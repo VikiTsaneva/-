@@ -90,10 +90,7 @@ function updateInstallButton() {
         if (permanentInstallBtn) permanentInstallBtn.style.display = 'block';
         if (iosInstructions) iosInstructions.style.display = 'none';
         
-        // Показваме банера ако има deferredPrompt
-        if (deferredPrompt && !localStorage.getItem('installBannerClosed')) {
-            installBanner.style.display = 'flex';
-        }
+        // Банерът е премахнат: не показваме нищо автоматично.
     }
 }
 
@@ -115,7 +112,7 @@ window.promptInstall = function() {
                 updateInstallButton();
             }
             deferredPrompt = null;
-            installBanner.style.display = 'none';
+            if (installBanner) installBanner.style.display = 'none';
         });
     } else {
         // Няма beforeinstallprompt (още). Най-честите причини са:
@@ -169,7 +166,7 @@ window.addEventListener('appinstalled', () => {
 // Затваряне на банера
 if (closeInstallBanner) {
     closeInstallBanner.addEventListener('click', () => {
-        installBanner.style.display = 'none';
+        if (installBanner) installBanner.style.display = 'none';
         localStorage.setItem('installBannerClosed', 'true');
     });
 }
