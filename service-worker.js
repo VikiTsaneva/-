@@ -1,4 +1,4 @@
-const CACHE_NAME = 'parkly-v3';
+const CACHE_NAME = 'parkly-v4';
 // ВАЖНО: Кешираме само локални ресурси.
 // Опитът да кешираме CDN ресурси в install често проваля инсталацията на SW (CORS/opaque),
 // което пък пречи приложението да стане "installable" и beforeinstallprompt да се появи.
@@ -53,33 +53,47 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  const url = new URL(event.request.url);
+
+  // За основните локални assets (JS/CSS) ползваме Network First, за да не "залепват" стари версии.
+  const isSameOrigin = url.origin === self.location.origin;
+  const isJsOrCss =
+    url.pathname.endsWith('/js/script.js') ||
+    url.pathname.endsWith('/css/style.css');
+
+  if (isSameOrigin && isJsOrCss) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Default: Cache First, then Network
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Връщаме от кеш ако има
-        if (response) {
+    caches.match(event.request).then(response => {
+      if (response) return response;
+
+      return fetch(event.request).then(response => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
-        
-        // Ако няма в кеш, правим мрежова заявка
-        return fetch(event.request).then(
-          response => {
-            // Проверяваме дали отговорът е валиден
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
 
-            // Кешираме новия ресурс
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseToCache);
+        });
 
-            return response;
-          }
-        );
-      })
+        return response;
+      });
+    })
   );
 });
 
