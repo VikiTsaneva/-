@@ -1,18 +1,16 @@
-const CACHE_NAME = 'parkly-v1';
+const CACHE_NAME = 'parkly-v2';
+// ВАЖНО: Кешираме само локални ресурси.
+// Опитът да кешираме CDN ресурси в install често проваля инсталацията на SW (CORS/opaque),
+// което пък пречи приложението да стане "installable" и beforeinstallprompt да се появи.
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/img/logo.svg',
   '/img/icon-192.png',
   '/img/icon-512.png',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-  'https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js',
-  'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js',
-  'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js',
-  'https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js',
-  'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js'
+  '/css/style.css',
+  '/js/script.js'
 ];
 
 // Инсталиране на service worker

@@ -1572,6 +1572,26 @@ function loadLanguage() {
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM зареден, инициализиране...");
+
+    // ===== Service Worker регистрация (необходимо за PWA инсталация) =====
+    if ('serviceWorker' in navigator) {
+        // PWA install prompt работи само в secure context (HTTPS или http://localhost)
+        if (!window.isSecureContext) {
+            console.warn('PWA install: страницата не е в secure context (HTTPS/localhost).');
+        }
+
+        navigator.serviceWorker.register('/service-worker.js')
+            .then((reg) => {
+                console.log('Service Worker регистриран:', reg.scope);
+                // След като SW е наличен, шансът beforeinstallprompt да се появи е по-голям
+                updateInstallButton();
+            })
+            .catch((err) => {
+                console.error('Service Worker регистрацията се провали:', err);
+            });
+    } else {
+        console.warn('Service Worker не се поддържа от този браузър.');
+    }
     
     loadTheme();
     loadLanguage();
