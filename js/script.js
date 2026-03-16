@@ -1603,6 +1603,14 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('click', function() {
             const pageId = this.getAttribute('data-page');
             
+            // Специален навигационен елемент за инсталиране на приложението
+            if (!pageId && this.id === 'permanentInstallBtn') {
+                if (typeof window.promptInstall === 'function') {
+                    window.promptInstall();
+                }
+                return;
+            }
+            
             if (pageId === 'logout') {
                 logoutUser();
                 return;

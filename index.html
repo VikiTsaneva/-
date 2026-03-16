@@ -79,6 +79,12 @@
                     <span class="lang-bg">Настройки</span>
                     <span class="lang-en">Settings</span>
                 </div>
+                <!-- Навигационен бутон за инсталиране на приложението -->
+                <div class="nav-item" id="permanentInstallBtn">
+                    <i class="fas fa-download"></i>
+                    <span class="lang-bg">Инсталирай</span>
+                    <span class="lang-en">Install</span>
+                </div>
             </div>
             
             <div class="user-info" id="userInfo">
@@ -618,16 +624,6 @@
                 <div id="settings-page" class="page">
                     <h2 class="form-title lang-bg">Настройки</h2>
                     <h2 class="form-title lang-en">Settings</h2>
-                    
-                    <!-- Постоянен бутон за инсталиране -->
-                    <div class="install-button-container" id="permanentInstallContainer">
-                        <button class="install-btn-permanent" id="permanentInstallBtn" onclick="promptInstall()">
-                            <i class="fas fa-download"></i>
-                            <span class="lang-bg">Инсталирай приложението</span>
-                            <span class="lang-en">Install app</span>
-                        </button>
-                    </div>
-                    
                     <!-- iOS инструкции (показват се само на iOS) -->
                     <div class="ios-instructions hidden" id="iosInstructions">
                         <h4><i class="fab fa-apple"></i> <span class="lang-bg">За iOS устройства</span><span class="lang-en">For iOS devices</span></h4>
