@@ -1,16 +1,16 @@
-const CACHE_NAME = 'parkly-v2';
+const CACHE_NAME = 'parkly-v3';
 // ВАЖНО: Кешираме само локални ресурси.
 // Опитът да кешираме CDN ресурси в install често проваля инсталацията на SW (CORS/opaque),
 // което пък пречи приложението да стане "installable" и beforeinstallprompt да се появи.
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/img/logo.svg',
-  '/img/icon-192.png',
-  '/img/icon-512.png',
-  '/css/style.css',
-  '/js/script.js'
+  './',
+  './index.html',
+  './manifest.json',
+  './img/logo.svg',
+  './img/icon-192.png',
+  './img/icon-512.png',
+  './css/style.css',
+  './js/script.js'
 ];
 
 // Инсталиране на service worker
