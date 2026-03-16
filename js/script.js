@@ -1669,10 +1669,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const pageId = this.getAttribute('data-page');
             
             // Специален навигационен елемент за инсталиране на приложението
-            if (!pageId && this.id === 'permanentInstallBtn') {
-                if (typeof window.promptInstall === 'function') {
-                    window.promptInstall();
-                }
+            if (pageId === 'install') {
+                if (typeof window.promptInstall === 'function') window.promptInstall();
                 return;
             }
             
