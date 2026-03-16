@@ -386,7 +386,7 @@ async function displayFavorites() {
     
     const favoriteSpots = parkingSpotsData.filter(spot => userFavorites.includes(spot.id));
     
-    favoritesList.innerHTML = favoriteSpots.map(spot => {
+        favoritesList.innerHTML = favoriteSpots.map(spot => {
         const spotStatus = spot.id === 'spot1' ? spot1Status : 
                            spot.id === 'spot2' ? spot2Status : spot3Status;
         
@@ -408,10 +408,6 @@ async function displayFavorites() {
                 <span class="lang-en">Status: </span>
                 <span class="${statusClass}" style="padding: 3px 8px; border-radius: 5px;">${statusText}</span>
             </p>
-            ${spot.id === 'spot1' && currentUser ? `<p><i class="fas fa-ruler"></i> Разстояние: ${spot1Distance} см</p>` : ''}
-            ${spot.id === 'spot2' && currentUser ? `<p><i class="fas fa-ruler"></i> Разстояние: ${spot2Distance} см</p>` : ''}
-            ${spot.id === 'spot3' && currentUser ? `<p><i class="fas fa-ruler"></i> Разстояние: ${spot3Distance} см</p>` : ''}
-            
             <div class="favorite-actions">
                 <button class="navigate-btn" onclick="navigateToSpot(${spot.lat}, ${spot.lng}, '${spot.name}')">
                     <i class="fas fa-directions"></i> <span class="lang-bg">Навигирай</span><span class="lang-en">Navigate</span>
@@ -1014,9 +1010,10 @@ function updateSpotStatus(spotNumber, status, distance) {
     statusElement.innerHTML = icon + ' ' + statusText;
     statusElement.className = 'status-value ' + statusClass;
     
-    if (distance > 0) {
-        statusElement.title = (currentLang === 'bg' ? 'Разстояние: ' : 'Distance: ') + distance + ' cm';
-    }
+    // Скриваме визуалното показване на разстоянието (оставяме само вътрешна логика)
+    // if (distance > 0) {
+    //     statusElement.title = (currentLang === 'bg' ? 'Разстояние: ' : 'Distance: ') + distance + ' cm';
+    // }
 }
 
 function updateMapColors() {
@@ -1250,16 +1247,7 @@ function createParkingSpots() {
         popupContent += '<i class="fas fa-circle" style="color: ' + fillColor + '; font-size: 10px;"></i><strong>Статус:</strong> <span style="color: ' + fillColor + '; font-weight: 700;">' + statusText + '</span>';
         popupContent += '</div>';
         
-        if (i === 0 && currentUser) {
-            popupContent += '<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;"><i class="fas fa-ruler"></i><strong>Разстояние:</strong> ' + spot1Distance + ' см</div>';
-        }
-        if (i === 1 && currentUser) {
-            popupContent += '<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;"><i class="fas fa-ruler"></i><strong>Разстояние:</strong> ' + spot2Distance + ' см</div>';
-        }
-        if (i === 2 && currentUser) {
-            popupContent += '<div style="display: flex; alignments: center; gap: 8px; margin-bottom: 8px;"><i class="fas fa-ruler"></i><strong>Разстояние:</strong> ' + spot3Distance + ' см</div>';
-        }
-        
+        // Скрихме блока за "Разстояние", за да не се визуализира в popup-а
         if (!currentUser) {
             popupContent += '<div style="margin-top: 8px; padding: 8px; background: #fff3cd; border-radius: 8px; color: #856404;"><i class="fas fa-lock"></i> Влезте, за да видите статуса</div>';
         } else {
