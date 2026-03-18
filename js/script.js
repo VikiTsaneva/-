@@ -1617,9 +1617,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Ползваме относителен път, за да работи и когато приложението е хостнато в подпапка
-        navigator.serviceWorker.register('./service-worker.js')
+        navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' })
             .then((reg) => {
                 console.log('Service Worker регистриран:', reg.scope);
+
+                // Форсираме проверка за нов SW при всяко зареждане (полезно след deploy)
+                try { reg.update(); } catch (e) {}
+
+                // Ако има waiting SW, активираме го веднага
+                if (reg.waiting) {
+                    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                }
+
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    if (!newWorker) return;
+                    newWorker.addEventListener('statechange', () => {
+                        // Когато новият SW е инсталиран и има стар контролер -> активирай
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            newWorker.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                    });
+                });
 
                 // Ако SW още не контролира страницата, при първо активиране ще има controllerchange.
                 // Еднократен auto-reload прави приложението "controlled", което често отключва beforeinstallprompt.
