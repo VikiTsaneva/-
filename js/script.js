@@ -38,6 +38,7 @@ let spot3Distance = -1;
 let lastUpdateTime = null;
 let map = null;
 let parkingPolygons = [];
+let parkingMarkers = []; // Масив за маркери на паркоместата
 let allUsers = [];
 let filteredUsers = [];
 let currentAdminPage = 1;
@@ -51,6 +52,9 @@ const parkingSpotsData = [
     { id: "spot2", number: 2, name: "Място 2", nameEn: "Spot 2", type: "regular", lat: 42.8768, lng: 25.3179 },
     { id: "spot3", number: 3, name: "Място 3", nameEn: "Spot 3", type: "regular", lat: 42.8768, lng: 25.3179 }
 ];
+
+// Филтър за паркоместата
+let spotFilter = 'all'; // 'all', 'disabled', 'regular'
 
 // ===== PWA Инсталация =====
 const installBanner = document.getElementById('installBanner');
@@ -505,6 +509,9 @@ function updateUIBasedOnAuth(user) {
     
     // Актуализираме бутона за инсталиране
     updateInstallButton();
+    
+    // Актуализираме показването на статус панела според филтъра
+    updateStatusPanelDisplay();
 }
 
 function clearProfilePage() {
@@ -1166,6 +1173,7 @@ function createParkingSpots() {
     console.log("Създаване на паркоместа...");
     
     parkingPolygons = [];
+    parkingMarkers = []; // Очищаваме маркерите
     
     for (let i = 0; i < 3; i++) {
         const spotId = `spot${i+1}`;
@@ -1214,7 +1222,7 @@ function createParkingSpots() {
             labelHtml = '<div style="background: white; color: ' + fillColor + '; font-weight: 700; font-size: 18px; width: 38px; height: 38px; border-radius: 30px; display: flex; align-items: center; justify-content: center; border: 3px solid ' + fillColor + '; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-family: \'Segoe UI\', sans-serif; background: rgba(255,255,255,0.98);">' + (i + 1) + '</div>';
         }
         
-        L.marker([spotLat, spotLng], {
+        const marker = L.marker([spotLat, spotLng], {
             icon: L.divIcon({
                 className: 'parking-label',
                 html: labelHtml,
@@ -1222,6 +1230,12 @@ function createParkingSpots() {
                 iconAnchor: i === 0 ? [22, 22] : [19, 19]
             })
         }).addTo(map);
+        
+        // Съхранявам маркера с информация за кой паркинг е
+        parkingMarkers.push({
+            marker: marker,
+            spotId: spotId
+        });
         
         let statusText;
         if (i === 0) statusText = spot1Status;
@@ -1270,6 +1284,11 @@ function createParkingSpots() {
     }
     
     console.log("Паркоместата са създадени успешно");
+    
+    // Применяваме филтъра след създаването със малка задержка
+    setTimeout(() => {
+        updateMapParkingSpots();
+    }, 100);
 }
 
 // ===== ФУНКЦИИ ЗА АУТЕНТИКАЦИЯ =====
@@ -1571,6 +1590,9 @@ function setLanguage(lang) {
     if (document.getElementById('favorites-page').classList.contains('active')) {
         displayFavorites();
     }
+    
+    // Актуализираме показването на статус панела според филтъра
+    updateStatusPanelDisplay();
 }
 
 function loadLanguage() {
@@ -1913,6 +1935,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Актуализираме бутона за инсталиране при зареждане
     updateInstallButton();
+    
+    // Инициализираме показването на статус панела според филтъра
+    updateStatusPanelDisplay();
 });
 
 console.log("Система за мониторинг на паркинг места - Габрово");
@@ -1920,6 +1945,133 @@ console.log("Използва два Firebase проекта:");
 console.log("- Authentication & Firestore: registration-88c86");
 console.log("- Realtime Database: esp32-5d620");
 console.log("- PWA инсталация: активна");
+
+// ===== ФУНКЦИИ ЗА ФИЛТРИРАНЕ НА ПАРКОМЕСТАТА =====
+function setSpotFilter(filterType) {
+    spotFilter = filterType;
+    
+    // Актуализираем активний бутон за статус панел
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Актуализираме активния бутон за картата
+    document.querySelectorAll('.filter-btn-map').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    if (filterType === 'all') {
+        const filterAllBtn = document.getElementById('filter-all');
+        const filterAllMapBtn = document.getElementById('filter-all-map');
+        if (filterAllBtn) filterAllBtn.classList.add('active');
+        if (filterAllMapBtn) filterAllMapBtn.classList.add('active');
+    } else if (filterType === 'disabled') {
+        const filterDisabledBtn = document.getElementById('filter-disabled');
+        const filterDisabledMapBtn = document.getElementById('filter-disabled-map');
+        if (filterDisabledBtn) filterDisabledBtn.classList.add('active');
+        if (filterDisabledMapBtn) filterDisabledMapBtn.classList.add('active');
+    } else if (filterType === 'regular') {
+        const filterRegularBtn = document.getElementById('filter-regular');
+        const filterRegularMapBtn = document.getElementById('filter-regular-map');
+        if (filterRegularBtn) filterRegularBtn.classList.add('active');
+        if (filterRegularMapBtn) filterRegularMapBtn.classList.add('active');
+    }
+    
+    // Актуализираме показването на статус елементите
+    updateStatusPanelDisplay();
+    
+    // Актуализираме показването на паркоместата на картата
+    updateMapParkingSpots();
+}
+
+function updateMapParkingSpots() {
+    const visibleSpots = getVisibleSpots();
+    const visibleSpotIds = visibleSpots.map(spot => spot.id);
+    
+    console.log("Филтър приложен:", spotFilter, "Видими места:", visibleSpotIds);
+    console.log("Полигони:", parkingPolygons ? parkingPolygons.length : 0, "Маркери:", parkingMarkers ? parkingMarkers.length : 0);
+    
+    // Скриваме/показваме полигоните на картата според филтъра
+    if (parkingPolygons && parkingPolygons.length > 0) {
+        parkingPolygons.forEach((polygon, index) => {
+            const spotId = `spot${index + 1}`;
+            console.log("Проверка полигон:", spotId, "видима:", visibleSpotIds.includes(spotId));
+            
+            try {
+                if (visibleSpotIds.includes(spotId)) {
+                    // Показваме полигона
+                    polygon.setStyle({opacity: 1, fillOpacity: 0.8});
+                    if (!map.hasLayer(polygon)) {
+                        map.addLayer(polygon);
+                    }
+                } else {
+                    // Скриваме полигона - намаляваме опацитета или премахваме
+                    if (map.hasLayer(polygon)) {
+                        map.removeLayer(polygon);
+                    }
+                }
+            } catch(e) {
+                console.error("Грешка със полигон:", e);
+            }
+        });
+    }
+    
+    // Скриваме/показваме маркерите на картата според филтъра
+    if (parkingMarkers && parkingMarkers.length > 0) {
+        parkingMarkers.forEach((markerObj, idx) => {
+            console.log("Проверка маркер:", idx, markerObj.spotId, "видим:", visibleSpotIds.includes(markerObj.spotId));
+            
+            try {
+                if (visibleSpotIds.includes(markerObj.spotId)) {
+                    // Показваме маркера
+                    if (!map.hasLayer(markerObj.marker)) {
+                        map.addLayer(markerObj.marker);
+                    }
+                    const elem = markerObj.marker.getElement();
+                    if (elem) {
+                        elem.style.display = 'block';
+                        elem.style.visibility = 'visible';
+                    }
+                } else {
+                    // Скриваме маркера
+                    const elem = markerObj.marker.getElement();
+                    if (elem) {
+                        elem.style.display = 'none';
+                        elem.style.visibility = 'hidden';
+                    }
+                    if (map.hasLayer(markerObj.marker)) {
+                        map.removeLayer(markerObj.marker);
+                    }
+                }
+            } catch (e) {
+                console.error("Грешка със маркер:", e);
+            }
+        });
+    }
+    
+    console.log("Филтрирането завършено");
+}
+
+function getVisibleSpots() {
+    if (spotFilter === 'all') {
+        return parkingSpotsData;
+    } else if (spotFilter === 'disabled') {
+        return parkingSpotsData.filter(spot => spot.type === 'disabled');
+    } else if (spotFilter === 'regular') {
+        return parkingSpotsData.filter(spot => spot.type === 'regular');
+    }
+    return parkingSpotsData;
+}
+
+function updateStatusPanelDisplay() {
+    const visibleSpots = getVisibleSpots();
+    const visibleSpotIds = visibleSpots.map(spot => spot.id);
+    
+    // Скриваме/показваме статус елементите според филтъра
+    document.getElementById('spot1-item').style.display = visibleSpotIds.includes('spot1') ? 'flex' : 'none';
+    document.getElementById('spot2-item').style.display = visibleSpotIds.includes('spot2') ? 'flex' : 'none';
+    document.getElementById('spot3-item').style.display = visibleSpotIds.includes('spot3') ? 'flex' : 'none';
+}
 
 // ===== Модална нотификация (втората версия на showNotification) =====
 function showNotification(title, message, icon = 'ℹ️', buttons = null) {

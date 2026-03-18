@@ -357,6 +357,79 @@ body {
     font-size: 14px;
 }
 
+/* Map filter container */
+.map-filter-container {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1001;
+    background: var(--map-title-bg);
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    pointer-events: auto;
+    transition: background-color 0.3s ease;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: var(--text-color);
+    white-space: nowrap;
+    font-size: 0.95rem;
+}
+
+.filter-buttons-map {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.filter-btn-map {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    font-weight: 500;
+    pointer-events: auto;
+}
+
+.filter-btn-map:hover {
+    border-color: var(--secondary);
+    color: var(--secondary);
+    background: var(--light);
+}
+
+.filter-btn-map.active {
+    background: var(--secondary);
+    color: white;
+    border-color: var(--secondary);
+}
+
+.filter-btn-map i {
+    font-size: 0.9rem;
+}
+
 /* Статус панел */
 .status-panel.restricted {
     filter: blur(4px);
@@ -401,6 +474,48 @@ body {
 
 .status-title i {
     color: var(--secondary);
+}
+
+/* Filter buttons */
+.filter-buttons {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    pointer-events: auto;
+}
+
+.filter-btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    font-weight: 500;
+    pointer-events: auto;
+}
+
+.filter-btn:hover {
+    border-color: var(--secondary);
+    color: var(--secondary);
+    background: var(--light);
+}
+
+.filter-btn.active {
+    background: var(--secondary);
+    color: white;
+    border-color: var(--secondary);
+}
+
+.filter-btn i {
+    font-size: 0.9rem;
 }
 
 .status-item {
@@ -2247,6 +2362,47 @@ select option {
         font-size: 0.75rem;
     }
     
+    .map-filter-container {
+        top: 75px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        padding: 10px 12px;
+        width: 90vw;
+        max-width: 95%;
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .filter-label {
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+    
+    .filter-buttons-map {
+        width: 100%;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .filter-btn-map {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+        flex: 0 1 auto;
+        min-width: 100px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .filter-btn-map i {
+        display: inline-block;
+    }
+    
     .status-panel {
         position: relative;
         top: auto;
@@ -2719,6 +2875,49 @@ select option {
 
 /* Допълнителни responsive правила за много малки екрани */
 @media (max-width: 480px) {
+    .map-filter-container {
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 95vw;
+        max-width: none;
+        padding: 12px 12px;
+        border-radius: 10px;
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .filter-label {
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+    
+    .filter-buttons-map {
+        width: 100%;
+        gap: 6px;
+        justify-content: center;
+    }
+    
+    .filter-btn-map {
+        font-size: 0.8rem;
+        padding: 10px 12px;
+        flex: 0 1 auto;
+        min-width: 90px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+    
+    .filter-btn-map i {
+        font-size: 1rem;
+        display: inline-block;
+    }
+    
     .users-table {
         font-size: 0.9rem;
     }
