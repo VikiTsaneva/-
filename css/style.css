@@ -430,6 +430,52 @@ body {
     font-size: 0.9rem;
 }
 
+.spot-filter {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    pointer-events: auto; /* map-title има pointer-events:none */
+}
+
+.spot-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+}
+
+.spot-filter-btn i {
+    font-size: 0.9rem;
+    color: var(--secondary);
+}
+
+.spot-filter-btn:hover {
+    border-color: var(--secondary);
+    color: var(--secondary);
+    background: var(--light);
+    transform: translateY(-1px);
+}
+
+.spot-filter-btn.active,
+.spot-filter-btn[aria-pressed="true"] {
+    background: var(--secondary);
+    color: #ffffff;
+    border-color: var(--secondary);
+}
+
+.spot-filter-btn.active i,
+.spot-filter-btn[aria-pressed="true"] i {
+    color: #ffffff;
+}
+
 /* Статус панел */
 .status-panel.restricted {
     filter: blur(4px);
@@ -2413,6 +2459,17 @@ select option {
         min-width: auto;
         pointer-events: auto;
         padding: 10px;
+    }
+
+    .spot-filter {
+        gap: 6px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
+
+    .spot-filter-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
     }
     
     .info-footer {

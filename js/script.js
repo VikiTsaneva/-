@@ -1212,6 +1212,8 @@ function createParkingSpots() {
             fillOpacity: 0.8,
             weight: 2
         }).addTo(map);
+        // Записваме spotId, за да можем да филтрираме/оцветяваме коректно
+        parkingSpace.spotId = spotId;
         
         parkingPolygons.push(parkingSpace);
         
@@ -1689,6 +1691,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const navItems = document.querySelectorAll('.nav-item');
     const pages = document.querySelectorAll('.page');
     const pageTitle = document.getElementById('page-title');
+
+    // Филтър за паркоместа (работи с #spotFilter от index.html)
+    const spotFilterRoot = document.getElementById('spotFilter');
+    if (spotFilterRoot) {
+        spotFilterRoot.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-spot-filter]');
+            if (!btn) return;
+            setSpotFilter(btn.getAttribute('data-spot-filter') || 'all');
+        });
+    }
     
     navItems.forEach(function(item) {
         item.addEventListener('click', function() {
@@ -1968,32 +1980,15 @@ console.log("- PWA инсталация: активна");
 // ===== ФУНКЦИИ ЗА ФИЛТРИРАНЕ НА ПАРКОМЕСТАТА =====
 function setSpotFilter(filterType) {
     spotFilter = filterType;
-    
-    // Актуализираем активний бутон за статус панел
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Актуализираме активния бутон за картата
-    document.querySelectorAll('.filter-btn-map').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    if (filterType === 'all') {
-        const filterAllBtn = document.getElementById('filter-all');
-        const filterAllMapBtn = document.getElementById('filter-all-map');
-        if (filterAllBtn) filterAllBtn.classList.add('active');
-        if (filterAllMapBtn) filterAllMapBtn.classList.add('active');
-    } else if (filterType === 'disabled') {
-        const filterDisabledBtn = document.getElementById('filter-disabled');
-        const filterDisabledMapBtn = document.getElementById('filter-disabled-map');
-        if (filterDisabledBtn) filterDisabledBtn.classList.add('active');
-        if (filterDisabledMapBtn) filterDisabledMapBtn.classList.add('active');
-    } else if (filterType === 'regular') {
-        const filterRegularBtn = document.getElementById('filter-regular');
-        const filterRegularMapBtn = document.getElementById('filter-regular-map');
-        if (filterRegularBtn) filterRegularBtn.classList.add('active');
-        if (filterRegularMapBtn) filterRegularMapBtn.classList.add('active');
+
+    // UI: работим с реалните бутони в index.html (#spotFilter / .spot-filter-btn)
+    const filterRoot = document.getElementById('spotFilter');
+    if (filterRoot) {
+        filterRoot.querySelectorAll('[data-spot-filter]').forEach((btn) => {
+            const isActive = (btn.getAttribute('data-spot-filter') === spotFilter);
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
     }
     
     // Актуализираме показването на статус елементите
@@ -2006,18 +2001,14 @@ function setSpotFilter(filterType) {
 function updateMapParkingSpots() {
     const visibleSpots = getVisibleSpots();
     const visibleSpotIds = visibleSpots.map(spot => spot.id);
-    
-    console.log("Филтър приложен:", spotFilter, "Видими места:", visibleSpotIds);
-    console.log("Полигони:", parkingPolygons ? parkingPolygons.length : 0, "Маркери:", parkingMarkers ? parkingMarkers.length : 0);
-    
+
     // Скриваме/показваме полигоните на картата според филтъра
     if (parkingPolygons && parkingPolygons.length > 0) {
-        parkingPolygons.forEach((polygon, index) => {
-            const spotId = `spot${index + 1}`;
-            console.log("Проверка полигон:", spotId, "видима:", visibleSpotIds.includes(spotId));
+        parkingPolygons.forEach((polygon) => {
+            const pid = polygon.spotId;
             
             try {
-                if (visibleSpotIds.includes(spotId)) {
+                if (visibleSpotIds.includes(pid)) {
                     // Показваме полигона
                     polygon.setStyle({opacity: 1, fillOpacity: 0.8});
                     if (!map.hasLayer(polygon)) {
@@ -2037,9 +2028,7 @@ function updateMapParkingSpots() {
     
     // Скриваме/показваме маркерите на картата според филтъра
     if (parkingMarkers && parkingMarkers.length > 0) {
-        parkingMarkers.forEach((markerObj, idx) => {
-            console.log("Проверка маркер:", idx, markerObj.spotId, "видим:", visibleSpotIds.includes(markerObj.spotId));
-            
+        parkingMarkers.forEach((markerObj) => {
             try {
                 if (visibleSpotIds.includes(markerObj.spotId)) {
                     // Показваме маркера
@@ -2067,8 +2056,6 @@ function updateMapParkingSpots() {
             }
         });
     }
-    
-    console.log("Филтрирането завършено");
 }
 
 function getVisibleSpots() {
@@ -2085,11 +2072,34 @@ function getVisibleSpots() {
 function updateStatusPanelDisplay() {
     const visibleSpots = getVisibleSpots();
     const visibleSpotIds = visibleSpots.map(spot => spot.id);
-    
-    // Скриваме/показваме статус елементите според филтъра
-    document.getElementById('spot1-item').style.display = visibleSpotIds.includes('spot1') ? 'flex' : 'none';
-    document.getElementById('spot2-item').style.display = visibleSpotIds.includes('spot2') ? 'flex' : 'none';
-    document.getElementById('spot3-item').style.display = visibleSpotIds.includes('spot3') ? 'flex' : 'none';
+
+    const statusPanel = document.getElementById('statusPanel');
+    const loginPrompt = document.getElementById('loginPrompt');
+    const statusTitle = statusPanel?.querySelector('.status-title');
+    const lastUpdate = statusPanel?.querySelector('.last-update');
+
+    const s1 = document.getElementById('spot1-item');
+    const s2 = document.getElementById('spot2-item');
+    const s3 = document.getElementById('spot3-item');
+
+    // Ако не е логнат: показваме само съобщението/линка и скриваме редовете
+    if (!currentUser) {
+        if (loginPrompt) loginPrompt.style.display = 'block';
+        if (statusTitle) statusTitle.style.display = 'none';
+        if (lastUpdate) lastUpdate.style.display = 'none';
+        if (s1) s1.style.display = 'none';
+        if (s2) s2.style.display = 'none';
+        if (s3) s3.style.display = 'none';
+        return;
+    }
+
+    // Логнат: показваме заглавието/часа и филтрираме редовете по избрания филтър
+    if (loginPrompt) loginPrompt.style.display = 'none';
+    if (statusTitle) statusTitle.style.display = '';
+    if (lastUpdate) lastUpdate.style.display = '';
+    if (s1) s1.style.display = visibleSpotIds.includes('spot1') ? '' : 'none';
+    if (s2) s2.style.display = visibleSpotIds.includes('spot2') ? '' : 'none';
+    if (s3) s3.style.display = visibleSpotIds.includes('spot3') ? '' : 'none';
 }
 
 // ===== Модална нотификация (втората версия на showNotification) =====
