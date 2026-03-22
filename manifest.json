@@ -1,6 +1,6 @@
 {
-  "name": "Parkly",
-  "short_name": "Parkly",
+  "name": "Parki",
+  "short_name": "Parki",
   "description": "Откривайте свободни паркоместа в реално време",
   "start_url": "./",
   "display": "standalone",

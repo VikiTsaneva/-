@@ -94,7 +94,7 @@ function updateInstallButton() {
         if (permanentInstallBtn) permanentInstallBtn.style.display = 'block';
         if (iosInstructions) iosInstructions.style.display = 'none';
         
-        // Банерът е премахнат: не показваме нищо автоматично.
+       
     }
 }
 
@@ -164,7 +164,7 @@ window.addEventListener('appinstalled', () => {
     console.log('Parkly беше инсталирано');
     deferredPrompt = null;
     updateInstallButton();
-    showNotification('✅ Благодарим, че инсталирахте Parkly!', 'success');
+    showNotification('✅ Благодарим, че инсталирахте Parki!', 'success');
 });
 
 // Затваряне на банера
@@ -453,7 +453,7 @@ function updateUIBasedOnAuth(user) {
         
         loadUserFavorites().then(() => {
             updateFavoriteButtons();
-            // Преиграваме паркоместата за да обновим попапите със новата информация за любимите места
+            
             if (map && parkingPolygons.length > 0) {
                 createParkingSpots();
             }
@@ -618,7 +618,7 @@ window.saveProfileChanges = async function() {
     if (!firstName || !lastName) {
         const currentLang = document.body.getAttribute('data-lang') || 'bg';
         showNotification(
-            currentLang === 'bg' ? '📝 Задължителни полета' : '📝 Required Fields',
+            currentLang === 'bg' ? ' Задължителни полета' : ' Required Fields',
             currentLang === 'bg' ? 'Моля, попълнете име и фамилия' : 'Please enter first and last name',
             '📝'
         );
@@ -995,13 +995,11 @@ function setupFirebaseListeners() {
     console.log("Firebase слушатели са активирани (включително за място 3)");
     
     // Слушател за актуални промени във Firestore потребители
-    // Този слушател гарантира, че админ-панелът показва най-новите данни винаги
     db.collection('users').onSnapshot((snapshot) => {
         if (!isAdmin || !document.getElementById('adminUsersTableBody')) {
-            return; // Не обновяваме, ако не е админ или админ панелът не е открит
+            return; 
         }
         
-        // Зареждаме всички потребители отново
         allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         filteredUsers = [...allUsers];
         
@@ -1059,10 +1057,6 @@ function updateSpotStatus(spotNumber, status, distance) {
     statusElement.innerHTML = icon + ' ' + statusText;
     statusElement.className = 'status-value ' + statusClass;
     
-    // Скриваме визуалното показване на разстоянието (оставяме само вътрешна логика)
-    // if (distance > 0) {
-    //     statusElement.title = (currentLang === 'bg' ? 'Разстояние: ' : 'Distance: ') + distance + ' cm';
-    // }
 }
 
 function updateMapColors() {
@@ -1225,7 +1219,7 @@ function createParkingSpots() {
     }
     
     parkingPolygons = [];
-    parkingMarkers = []; // Очищаваме маркерите
+    parkingMarkers = []; 
     
     for (let i = 0; i < 3; i++) {
         const spotId = `spot${i+1}`;

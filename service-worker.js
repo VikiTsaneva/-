@@ -1,4 +1,4 @@
-const CACHE_NAME = 'parkly-v5';
+const CACHE_NAME = 'parki-v5';
 // ВАЖНО: Кешираме само локални ресурси.
 // Опитът да кешираме CDN ресурси в install често проваля инсталацията на SW (CORS/opaque),
 // което пък пречи приложението да стане "installable" и beforeinstallprompt да се появи.
