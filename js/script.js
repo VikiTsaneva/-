@@ -758,7 +758,7 @@ function displayAdminUsers() {
         const favoritesCount = user.favorites ? user.favorites.length : 0;
 
         return `
-        <tr>
+        <tr${user.isDeleted ? ' class="deleted-user"' : ''}>
                     <td data-label="${currentLang === 'bg' ? 'Име' : 'First'}">${user.firstName || '-'}</td>
                     <td data-label="${currentLang === 'bg' ? 'Фамилия' : 'Last'}">${user.lastName || '-'}</td>
                     <td data-label="${currentLang === 'bg' ? 'Имейл' : 'Email'}">${user.email}</td>
@@ -773,7 +773,7 @@ function displayAdminUsers() {
                 : `<button class=\"btn-small btn-warning\" onclick=\"removeAdmin('${user.id}')\">${currentLang === 'bg' ? 'Премахни' : 'Remove'}</button>`
             }
                         <button class=\"btn-small btn-info\" onclick=\"viewUserDetails('${user.id}')\">${currentLang === 'bg' ? 'Детайли' : 'Details'}</button>
-                        <button class=\"btn-small btn-danger\" onclick=\"deleteUser('${user.id}')\">${currentLang === 'bg' ? 'Изтрий' : 'Delete'}</button>
+                        <button class=\"btn-small btn-danger\" onclick=\"${user.isDeleted ? 'reactivateUser' : 'deleteUser'}('${user.id}')\">${currentLang === 'bg' ? (user.isDeleted ? 'Реактивирай' : 'Деактивирай') : (user.isDeleted ? 'Reactivate' : 'Deactivate')}</button>
                     </td>
         </tr>
     `}).join('');
@@ -902,13 +902,35 @@ window.closeUserDetailsModal = function () {
 
 window.deleteUser = async function (userId) {
     const currentLang = document.body.getAttribute('data-lang') || 'bg';
-    if (!confirm(currentLang === 'bg' ? 'ВНИМАНИЕ! Сигурни ли сте, че искате да изтриете този потребител? Това действие е необратимо!' : ' WARNING! Are you sure you want to delete this user? This action is irreversible!')) return;
+    if (!confirm(currentLang === 'bg' ? 'ВНИМАНИЕ! Сигурни ли сте, че искате да деактивирате този потребител? Това ще му попречи да влиза в системата.' : ' WARNING! Are you sure you want to deactivate this user? This will prevent them from logging in.')) return;
 
     try {
-        await db.collection('users').doc(userId).delete();
+        await db.collection('users').doc(userId).update({ isDeleted: true });
         showNotification(
-            currentLang === 'bg' ? ' Потребител изтрит' : ' User Deleted',
-            currentLang === 'bg' ? 'Потребителят е успешно премахнат от системата!' : 'User has been successfully removed from the system!',
+            currentLang === 'bg' ? ' Потребител деактивиран' : ' User Deactivated',
+            currentLang === 'bg' ? 'Потребителят е успешно деактивиран и няма да може да влиза в системата!' : 'User has been successfully deactivated and cannot log in!',
+            ''
+        );
+        loadAllUsers();
+        closeUserDetailsModal();
+    } catch (error) {
+        showNotification(
+            currentLang === 'bg' ? ' Грешка' : ' Error',
+            error.message,
+            ''
+        );
+    }
+};
+
+window.reactivateUser = async function (userId) {
+    const currentLang = document.body.getAttribute('data-lang') || 'bg';
+    if (!confirm(currentLang === 'bg' ? 'Сигурни ли сте, че искате да реактивирате този потребител? Той ще може да влиза в системата отново.' : 'Are you sure you want to reactivate this user? They will be able to log in again.')) return;
+
+    try {
+        await db.collection('users').doc(userId).update({ isDeleted: false });
+        showNotification(
+            currentLang === 'bg' ? ' Потребител реактивиран' : ' User Reactivated',
+            currentLang === 'bg' ? 'Потребителят е успешно реактивиран и може да влиза в системата!' : 'User has been successfully reactivated and can log in!',
             ''
         );
         loadAllUsers();
@@ -1740,7 +1762,20 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 if (userDoc.exists) {
-                    const dbEmailVerified = userDoc.data().emailVerified || false;
+                    const userData = userDoc.data();
+                    if (userData.isDeleted) {
+                        // Деактивиран потребител
+                        const currentLang = document.body.getAttribute('data-lang') || 'bg';
+                        showNotification(
+                            currentLang === 'bg' ? 'Акаунт деактивиран' : 'Account Deactivated',
+                            currentLang === 'bg' ? 'Вашият акаунт е бил деактивиран от администратор.' : 'Your account has been deactivated by an administrator.',
+                            ''
+                        );
+                        await auth.signOut();
+                        return;
+                    }
+
+                    const dbEmailVerified = userData.emailVerified || false;
                     const authEmailVerified = user.emailVerified;
 
                     // Ако има несъответствие между Auth и Firestore, актуализиране на Firestore
