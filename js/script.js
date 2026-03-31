@@ -700,11 +700,13 @@ async function loadAllUsers() {
 }
 
 function updateAdminStats() {
+    const activeUsers = allUsers.filter(u => !u.isDeleted);
     document.getElementById('adminTotalUsers').textContent = allUsers.length;
-    document.getElementById('adminVerifiedUsers').textContent = allUsers.filter(u => u.emailVerified).length;
-    document.getElementById('adminGoogleUsers').textContent = allUsers.filter(u => u.provider === 'google').length;
-    document.getElementById('adminEmailUsers').textContent = allUsers.filter(u => u.provider === 'email' || !u.provider).length;
-    document.getElementById('adminAdminUsers').textContent = allUsers.filter(u => u.isAdmin || u.role === 'admin').length;
+    document.getElementById('adminVerifiedUsers').textContent = activeUsers.filter(u => u.emailVerified).length;
+    document.getElementById('adminGoogleUsers').textContent = activeUsers.filter(u => u.provider === 'google').length;
+    document.getElementById('adminEmailUsers').textContent = activeUsers.filter(u => u.provider === 'email' || !u.provider).length;
+    document.getElementById('adminAdminUsers').textContent = activeUsers.filter(u => u.isAdmin || u.role === 'admin').length;
+    document.getElementById('adminDeactivatedUsers').textContent = allUsers.filter(u => u.isDeleted).length;
 }
 
 function setupAdminSearch() {
@@ -773,7 +775,7 @@ function displayAdminUsers() {
                 : `<button class=\"btn-small btn-warning\" onclick=\"removeAdmin('${user.id}')\">${currentLang === 'bg' ? 'Премахни' : 'Remove'}</button>`
             }
                         <button class=\"btn-small btn-info\" onclick=\"viewUserDetails('${user.id}')\">${currentLang === 'bg' ? 'Детайли' : 'Details'}</button>
-                        <button class=\"btn-small btn-danger\" onclick=\"${user.isDeleted ? 'reactivateUser' : 'deleteUser'}('${user.id}')\">${currentLang === 'bg' ? (user.isDeleted ? 'Реактивирай' : 'Деактивирай') : (user.isDeleted ? 'Reactivate' : 'Deactivate')}</button>
+                        <button class=\"btn-small btn-danger\" onclick=\"${user.isDeleted ? 'reactivateUser' : 'deleteUser'}('${user.id}')\">${currentLang === 'bg' ? (user.isDeleted ? 'Активирай' : 'Деактивирай') : (user.isDeleted ? 'Activate' : 'Deactivate')}</button>
                     </td>
         </tr>
     `}).join('');

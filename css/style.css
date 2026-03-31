@@ -2222,7 +2222,10 @@ select option {
 
 .deleted-user {
     opacity: 0.6;
-    text-decoration: line-through;
+}
+
+.deleted-user .btn-small {
+    opacity: 1;
 }
 
 .btn-small {
