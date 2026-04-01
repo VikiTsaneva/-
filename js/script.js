@@ -1220,8 +1220,21 @@ function initializeMap() {
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 22
+            minZoom: 15,
+            maxZoom: 22,
+            maxNativeZoom: 19,
+            noWrap: true,
+            errorTileUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg'
         }).addTo(map);
+
+        map.on('zoomend', () => {
+            const zoom = map.getZoom();
+            if (zoom > 22) {
+                map.setZoom(22);
+            } else if (zoom < 15) {
+                map.setZoom(15);
+            }
+        });
 
         createParkingSpots();
 
