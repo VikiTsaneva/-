@@ -23,7 +23,7 @@ const db = firebase.firestore();
 const secondaryApp = firebase.initializeApp(databaseConfig, "secondary");
 const rtdb = secondaryApp.database();
 
-// Инициализиране на EmailJS (заменете с вашите данни от https://www.emailjs.com/)
+// Инициализиране на EmailJS 
 emailjs.init("1HnRmk_dhUEdS49Eq");
 
 // ===== Глобални променливи =====
@@ -88,7 +88,7 @@ function updateInstallButton() {
     }
 
     if (isIOS()) {
-        // iOS - показваме инструкциите и бутона за менюто (за да се отвори easy access)
+        // iOS - показваме инструкциите и бутона за менюто 
         if (permanentInstallBtn) permanentInstallBtn.style.display = 'block';
         if (iosInstructions) iosInstructions.style.display = 'block';
         if (installBanner) installBanner.style.display = 'none';
@@ -112,7 +112,7 @@ window.promptInstall = function () {
         if (settingsNavItem) {
             settingsNavItem.click();
         }
-        showNotification('Следвайте инструкциите за да добавите Parkly на началния екран', 'success');
+        showNotification('Следвайте инструкциите за да добавите Parki на началния екран', 'success');
         return;
     }
 
@@ -121,16 +121,13 @@ window.promptInstall = function () {
         deferredPrompt.userChoice.then((choiceResult) => {
             if (choiceResult.outcome === 'accepted') {
                 console.log('Потребителят инсталира приложението');
-                showNotification('✅ Parkly беше инсталирано успешно!', 'success');
+                showNotification('✅ Parki беше инсталирано успешно!', 'success');
                 updateInstallButton();
             }
             deferredPrompt = null;
             if (installBanner) installBanner.style.display = 'none';
         });
     } else {
-        // Няма beforeinstallprompt (още). Най-честите причини са:
-        // - страницата не е в secure context (HTTPS/localhost)
-        // - service worker току-що е инсталиран и още не контролира страницата (нужен е reload)
         const isSecure = window.isSecureContext === true;
         const hasSW = ('serviceWorker' in navigator);
         const hasController = hasSW && !!navigator.serviceWorker.controller;
