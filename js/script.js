@@ -1392,8 +1392,25 @@ async function registerUser(email, password, firstName, lastName, phone) {
         return;
     }
 
-    if (password.length < 6) {
-        showError('register-error', '❌ Паролата трябва да е поне 6 символа');
+    const passwordRules = [];
+    if (password.length < 8) {
+        passwordRules.push('минимум 8 символа');
+    }
+    if (!/[A-Z]/.test(password)) {
+        passwordRules.push('поне една главна буква');
+    }
+    if (!/[a-z]/.test(password)) {
+        passwordRules.push('поне една малка буква');
+    }
+    if (!/[0-9]/.test(password)) {
+        passwordRules.push('поне една цифра');
+    }
+    if (!/[!@#$%^&*(),.?"{}|<>\[\]\\/~`_+=;:\-]/.test(password)) {
+        passwordRules.push('поне един специален символ');
+    }
+
+    if (passwordRules.length > 0) {
+        showError('register-error', '❌ Паролата трябва да съдържа: ' + passwordRules.join(', '));
         return;
     }
 
