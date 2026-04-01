@@ -479,6 +479,7 @@ function updateUIBasedOnAuth(user) {
 
             if (admin) {
                 loadAllUsers();
+                setupUsersListener();
             }
         });
 
@@ -1026,7 +1027,9 @@ function setupFirebaseListeners() {
     });
 
     console.log("Firebase слушатели са активирани (включително за място 3)");
+}
 
+function setupUsersListener() {
     // Слушател за актуални промени във Firestore потребители
     db.collection('users').onSnapshot((snapshot) => {
         if (!isAdmin || !document.getElementById('adminUsersTableBody')) {
