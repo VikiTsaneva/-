@@ -325,44 +325,32 @@ function updateFavoriteButtons() {
 
 function navigateToSpot(lat, lng, spotName) {
     const currentLang = document.body.getAttribute('data-lang') || 'bg';
+    const baseUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+
+    const navigationWindow = window.open('about:blank', '_blank');
+    if (!navigationWindow) {
+        console.warn('Popup blocked: unable to open navigation window');
+        return;
+    }
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function (position) {
                 const userLat = position.coords.latitude;
                 const userLng = position.coords.longitude;
-
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-                if (isMobile) {
-                    const url = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${lat},${lng}&travelmode=driving`;
-                    window.open(url, '_blank');
-                } else {
-                    const url = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${lat},${lng}&travelmode=driving`;
-                    window.open(url, '_blank');
-                }
-
+                const url = `${baseUrl}&origin=${userLat},${userLng}`;
+                navigationWindow.location = url;
                 console.log(`Навигация от (${userLat}, ${userLng}) до: ${spotName} (${lat}, ${lng})`);
             },
             function (error) {
                 console.warn(`Грешка при получаването на местоположението: ${error.message}`);
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-                if (isMobile) {
-                    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
-                    window.open(url, '_blank');
-                } else {
-                    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
-                    window.open(url, '_blank');
-                }
-
+                navigationWindow.location = baseUrl;
                 console.log(`Навигация до: ${spotName} (${lat}, ${lng}) - без начална точка`);
             }
         );
     } else {
-        console.warn('Geolocation не е поддържано в этот браузър');
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
-        window.open(url, '_blank');
+        console.warn('Geolocation не е поддържано в този браузър');
+        navigationWindow.location = baseUrl;
     }
 }
 
