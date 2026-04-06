@@ -327,7 +327,7 @@ function navigateToSpot(lat, lng, spotName) {
     const currentLang = document.body.getAttribute('data-lang') || 'bg';
     const baseUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
 
-    const navigationWindow = window.open('about:blank', '_blank');
+    const navigationWindow = window.open(baseUrl, '_blank');
     if (!navigationWindow) {
         console.warn('Popup blocked: unable to open navigation window');
         return;
@@ -339,18 +339,18 @@ function navigateToSpot(lat, lng, spotName) {
                 const userLat = position.coords.latitude;
                 const userLng = position.coords.longitude;
                 const url = `${baseUrl}&origin=${userLat},${userLng}`;
-                navigationWindow.location = url;
+                navigationWindow.location.href = url;
                 console.log(`Навигация от (${userLat}, ${userLng}) до: ${spotName} (${lat}, ${lng})`);
             },
             function (error) {
                 console.warn(`Грешка при получаването на местоположението: ${error.message}`);
-                navigationWindow.location = baseUrl;
+                navigationWindow.location.href = baseUrl;
                 console.log(`Навигация до: ${spotName} (${lat}, ${lng}) - без начална точка`);
             }
         );
     } else {
         console.warn('Geolocation не е поддържано в този браузър');
-        navigationWindow.location = baseUrl;
+        navigationWindow.location.href = baseUrl;
     }
 }
 
